@@ -1,87 +1,65 @@
-const express = require("express");
+const fs = require("fs").promises;
+const path = require("path");
+const { nanoid } = require("nanoid");
 
-const contacts = require("../../models/contacts");
+const contactsPath = path.join(__dirname, "contacts.json");
 
-const { HttpError } = require("../../helpers");
+const listContacts = async () => {
+  // Повертає масив контактів
+  const buffer = await fs.readFile(contactsPath);
 
-const router = express.Router();
+  return JSON.parse(buffer);
+};
 
-const Joi = require("joi");
+const getContactById = async (contactId) => {
+  // Повертає об'єкт контакту з таким id. Повертає null, якщо контакт з таким id не знайдений.
+  const contacts = await listContacts();
 
-const addSchema = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().required(),
-  phone: Joi.number().required(),
-});
+  return contacts.find(({ id }) => id === contactId) || null;
+};
 
-router.get("/", async (req, res, next) => {
-  try {
-    const result = await contacts.listContacts();
-    res.json(result);
-  } catch (error) {
-    next(error);
+const removeContact = async (contactId) => {
+  // Повертає об'єкт видаленого контакту. Повертає null, якщо контакт з таким id не знайдений.
+  const contacts = await listContacts();
+  const index = contacts.findIndex(({ id }) => id === contactId);
+  if (index === -1) {
+    return null;
   }
-});
+  const [contactRemoved] = contacts.splice(index, 1);
+  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const result = await contacts.getContactById(id);
-    if (!result) {
-      throw HttpError(404, "Not found");
-    }
+  return contactRemoved;
+};
 
-    res.json(result);
-  } catch (error) {
-    next(error);
+const addContact = async (body) => {
+  // Повертає об'єкт доданого контакту.
+  const contacts = await listContacts();
+  const contactAdded = { id: nanoid(), ...body };
+  contacts.push(contactAdded);
+  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
+
+  return contactAdded;
+};
+
+const updateContact = async (contactId, data) => {
+  // Повертає об'єкт оновленого контакту.
+  const contacts = await listContacts();
+  const index = contacts.findIndex(({ id }) => id === contactId);
+  if (index === -1) {
+    return null;
   }
-});
+  const [contactFinded] = contacts.splice(index, 1);
+  const contactUpdated = { ...contactFinded, ...data };
+  contacts.push(contactUpdated);
+  await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 
-router.post("/", async (req, res, next) => {
-  try {
-    const { error } = addSchema.validate(req.body);
-    if (error) {
-      throw HttpError(400, error.message);
-    }
+  return contactUpdated;
+};
 
-    const result = await contacts.addContact(req.body);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
-  }
-});
-
-router.delete("/:id", async (req, res, next) => {
-  try{
-    const {id}= req.params
-    const result = await contacts.removeContact(id)
-    if (!result) {
-      throw HttpError(404, "Not found");
-    }
-    return res.status(200).json({message: `contact ${id} deleted`})
-  }
-  catch(error){
-    next(error)
-  }
-});
-
-router.put("/:id", async (req, res, next) => {
-  try{
-    const { error } = addSchema.validate(req.body);
-    if (error) {
-      throw HttpError(400, error.message);
-    }
-    const {id} = req.params
-    const result = await contacts.updateContact(id, req.body)
-    if(!result){
-      throw HttpError(404, "Not found")
-    }
-    res.json(result)
-
-  }
-  catch(error){
-    next(error)
-  }
-});
-
-module.exports = router;
+module.exports = {
+  listContacts,
+  getContactById,
+  removeContact,
+  addContact,
+  updateContact,
+};
