@@ -34,11 +34,16 @@ const removeContact = async (contactId) => {
 const addContact = async (body) => {
   // Повертає об'єкт доданого контакту.
   const contacts = await listContacts();
-  const contactAdded = { id: nanoid(), ...body };
-  contacts.push(contactAdded);
+  const newContact = {
+    id: nanoid(),
+    name: body.name,
+    email: body.email,
+    phone: body.phone,
+  };
+  contacts.push(newContact);
   await fs.writeFile(contactsPath, JSON.stringify(contacts, null, 2));
 
-  return contactAdded;
+  return newContact;
 };
 
 const updateContact = async (contactId, data) => {
