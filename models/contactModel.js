@@ -33,15 +33,15 @@ const Contact = model("contact", schemaDBContactValidator);
 // Валідатори отриманих з клієнта даних
 const contactValidator = Joi.object({
   name: Joi.string().min(3).required(),
-  email: Joi.string().email(),
-  phone: Joi.string(),
+  email: Joi.string().email().required(),
+  phone: Joi.string().required(),
   favorite: Joi.boolean(),
 });
 
-const contactFavoriteValidator = Joi.object({
+const updateFavorit = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
-const schemas = { contactValidator, contactFavoriteValidator };
+const schemas = { contactValidator, updateFavorit };
 
 module.exports = { schemas, Contact };

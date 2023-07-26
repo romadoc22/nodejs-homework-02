@@ -31,7 +31,7 @@ router.put(
 router.patch(
   "/:id/favorite",
   isValidId,
-  validateBody(schemas.contactFavoriteValidator, "missing field favorite"),
+  validateBody(schemas.updateFavorit, "missing field favorite"),
   putContact
 );
 
