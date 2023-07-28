@@ -10,8 +10,10 @@ const {
   putContact,
 } = require("../../controllers");
 
-const { schemas } = require("../../models/contactModel");
-const { isValidId, validateBody } = require("../../middlewares");
+const { schemas } = require("../../models/contact");
+const { authenticate, isValidId, validateBody } = require("../../middlewares");
+
+router.use(authenticate);
 
 router.get("/", getContacts);
 
@@ -31,7 +33,7 @@ router.put(
 router.patch(
   "/:id/favorite",
   isValidId,
-  validateBody(schemas.updateFavorit, "missing field favorite"),
+  validateBody(schemas.contactFavoriteValidator, "missing field favorite"),
   putContact
 );
 

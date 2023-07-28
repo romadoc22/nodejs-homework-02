@@ -18,6 +18,10 @@ const schemaDBContactValidator = new Schema(
       type: Boolean,
       default: false,
     },
+    owner: {
+      type: Schema.Types.ObjectId,
+      ref: "user",
+    },
   },
   { timestamps: true, versionKey: false }
 );
@@ -33,15 +37,15 @@ const Contact = model("contact", schemaDBContactValidator);
 // Валідатори отриманих з клієнта даних
 const contactValidator = Joi.object({
   name: Joi.string().min(3).required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required(),
+  email: Joi.string().email(),
+  phone: Joi.string(),
   favorite: Joi.boolean(),
 });
 
-const updateFavorit = Joi.object({
+const contactFavoriteValidator = Joi.object({
   favorite: Joi.boolean().required(),
 });
 
-const schemas = { contactValidator, updateFavorit };
+const schemas = { contactValidator, contactFavoriteValidator };
 
 module.exports = { schemas, Contact };
