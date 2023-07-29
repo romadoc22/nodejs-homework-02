@@ -41,23 +41,28 @@ const putContact = async (req, res) => {
   res.json(contact);
 };
 
-const updateFavorite = async (req, res, next) => {
-  const { id } = req.params;
+const updateFavorite = async (req, res) => {
+  const { contactId } = req.params;
   const { favorite } = req.body;
 
   try {
+    // Оновлюємо статус поля favorite у контакту за допомогою функції `findByIdAndUpdate`
     const updatedContact = await Contact.findByIdAndUpdate(
-      id,
+      contactId,
       { favorite },
       { new: true }
     );
+
+    // Перевіряємо, чи знайдено контакт
     if (!updatedContact) {
       return res.status(404).json({ message: "Not found" });
     }
 
-    return res.status(200).json(updatedContact);
+    // Відправляємо оновлений контакт у відповідь
+    res.status(200).json(updatedContact);
   } catch (error) {
-    next(generateHTTPError(500, "Server Error"));
+    // Обробка помилок
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
