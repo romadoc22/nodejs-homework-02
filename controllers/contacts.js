@@ -1,5 +1,5 @@
-const { ctrlWrapper } = require("../helpers");
-const { generateHTTPError } = require("../helpers");
+const { Contact } = require("../models/contactModel");
+const { generateHTTPError, ctrlWrapper } = require("../helpers");
 
 const handlersDB = require("../models/contactsHandlers");
 
@@ -41,10 +41,31 @@ const putContact = async (req, res) => {
   res.json(contact);
 };
 
+const updateFavorite = async (req, res, next) => {
+  const { id } = req.params;
+  const { favorite } = req.body;
+
+  try {
+    const updatedContact = await Contact.findByIdAndUpdate(
+      id,
+      { favorite },
+      { new: true }
+    );
+    if (!updatedContact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    return res.status(200).json(updatedContact);
+  } catch (error) {
+    next(generateHTTPError(500, "Server Error"));
+  }
+};
+
 module.exports = {
   getContacts: ctrlWrapper(getContacts),
   getContactById: ctrlWrapper(getContactById),
   deleteContact: ctrlWrapper(deleteContact),
   postContact: ctrlWrapper(postContact),
   putContact: ctrlWrapper(putContact),
+  updateFavorite,
 };

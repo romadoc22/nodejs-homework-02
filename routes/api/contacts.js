@@ -1,6 +1,8 @@
 const express = require("express");
-
 const router = express.Router();
+
+const { isValidId, validateBody } = require("../../middlewares");
+const { schemas } = require("../../models/contactModel");
 
 const {
   getContacts,
@@ -8,10 +10,8 @@ const {
   deleteContact,
   postContact,
   putContact,
+  updateFavorite,
 } = require("../../controllers");
-
-const { schemas } = require("../../models/contactModel");
-const { isValidId, validateBody } = require("../../middlewares");
 
 router.get("/", getContacts);
 
@@ -32,7 +32,7 @@ router.patch(
   "/:id/favorite",
   isValidId,
   validateBody(schemas.updateFavorite, "missing field favorite"),
-  putContact
+  updateFavorite
 );
 
 module.exports = router;
