@@ -1,76 +1,90 @@
 const { Contact } = require("../models/contactModel");
-const { generateHTTPError, ctrlWrapper } = require("../helpers");
 
-const handlersDB = require("../models/contactsHandlers");
-
-const getContacts = async (req, res) => {
-  const result = await handlersDB.listContacts();
-  res.json(result);
-};
-
-const getContactById = async (req, res) => {
-  const { id } = req.params;
-  const contact = await handlersDB.getContactById(id);
-  if (!contact) {
-    throw generateHTTPError(404, "Not found");
-  }
-  res.json(contact);
-};
-
-const deleteContact = async (req, res) => {
-  const { id } = req.params;
-  const contact = await handlersDB.removeContact(id);
-  if (!contact) {
-    throw generateHTTPError(404, "Not found");
-  }
-  res.json({ message: "contact deleted" });
-};
-
-const postContact = async (req, res) => {
-  const contact = await handlersDB.addContact(req.body);
-  res.status(201).json(contact);
-};
-
-const putContact = async (req, res) => {
-  const { id } = req.params;
-
-  const contact = await handlersDB.updateContact(id, req.body);
-  if (!contact) {
-    throw generateHTTPError(404, "Not found");
-  }
-  res.json(contact);
-};
-
-const updateFavorite = async (req, res) => {
-  const { contactId } = req.params;
-  const { favorite } = req.body;
-
+const getContacts = async (req, res, next) => {
   try {
-    // Оновлюємо статус поля favorite у контакту за допомогою функції `findByIdAndUpdate`
-    const updatedContact = await Contact.findByIdAndUpdate(
-      contactId,
-      { favorite },
-      { new: true }
-    );
+    const contacts = await Contact.find();
+    return res.json(contacts);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    // Перевіряємо, чи знайдено контакт
+const getContactById = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const contact = await Contact.findById(id);
+    if (!contact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    return res.json(contact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteContact = async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const deletedContact = await Contact.findByIdAndRemove(id);
+    if (!deletedContact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    return res.json(deletedContact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const postContact = async (req, res, next) => {
+  const { body } = req;
+  try {
+    const newContact = await Contact.create(body);
+    return res.status(201).json(newContact);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const putContact = async (req, res, next) => {
+  const { id } = req.params;
+  const { body } = req;
+  try {
+    const updatedContact = await Contact.findByIdAndUpdate(id, body, {
+      new: true,
+    });
     if (!updatedContact) {
       return res.status(404).json({ message: "Not found" });
     }
-
-    // Відправляємо оновлений контакт у відповідь
-    res.status(200).json(updatedContact);
+    return res.json(updatedContact);
   } catch (error) {
-    // Обробка помилок
-    res.status(500).json({ message: "Internal server error" });
+    next(error);
+  }
+};
+
+const updateStatusContact = async (req, res, next) => {
+  const { id } = req.params;
+  const { favorite } = req.body;
+
+  try {
+    const updatedContact = await Contact.findByIdAndUpdate(
+      id,
+      { favorite },
+      { new: true }
+    );
+    if (!updatedContact) {
+      return res.status(404).json({ message: "Not found" });
+    }
+    return res.json(updatedContact);
+  } catch (error) {
+    next(error);
   }
 };
 
 module.exports = {
-  getContacts: ctrlWrapper(getContacts),
-  getContactById: ctrlWrapper(getContactById),
-  deleteContact: ctrlWrapper(deleteContact),
-  postContact: ctrlWrapper(postContact),
-  putContact: ctrlWrapper(putContact),
-  updateFavorite,
+  getContacts,
+  getContactById,
+  deleteContact,
+  postContact,
+  putContact,
+  updateStatusContact,
 };
