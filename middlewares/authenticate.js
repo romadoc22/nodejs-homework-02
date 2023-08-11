@@ -15,6 +15,7 @@ const authenticate = async (req, res, next) => {
   // Перевірка на валідність токена та існування користувача токена
   try {
     const { id } = jwt.verify(token, SECRET_KEY);
+    
     const user = await User.findById(id);
     if (!user || !user.token || user.token !== token) {
       next(generateHTTPError(401, "Not authorized"));
