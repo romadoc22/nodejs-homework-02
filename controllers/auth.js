@@ -55,7 +55,7 @@ const logIn = async (req, res) => {
   const token = jwt.sign(payload, SECRET_KEY, { expiresIn: TOKEN_EXPIRES_IN });
   await User.findByIdAndUpdate(user._id, { token });
 
-  console.log(token)
+  console.log(token);
 
   const { subscription, avatarURL } = user;
   res.json({
@@ -130,7 +130,7 @@ const updateUserAvatar = async (req, res) => {
     throw generateHTTPError(404, "Not found user");
   }
 
-  res.json({ user: { avatarURL } });
+  res.json({ avatarURL });
 };
 
 module.exports = {
