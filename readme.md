@@ -29,3 +29,6 @@
 - `npm run start:dev` &mdash; старт сервера в режимі розробки (development)
 - `npm run lint` &mdash; запустити виконання перевірки коду з eslint, необхідно виконувати перед кожним PR та виправляти всі помилки лінтера
 - `npm lint:fix` &mdash; та ж перевірка лінтера, але з автоматичними виправленнями простих помилок
+
+
+mail_api_key # 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
