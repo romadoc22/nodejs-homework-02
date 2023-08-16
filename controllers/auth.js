@@ -71,6 +71,10 @@ const resendEmail = async (req, res) => {
     throw generateHTTPError(404, "User not found");
   }
 
+  if (!email) {
+    throw generateHTTPError(400, "missing required field email");
+  }
+
   // Якщо користувач вже пройшов верифікацію
   if (user.verify) {
     throw generateHTTPError(400, "Verification has already been passed");
