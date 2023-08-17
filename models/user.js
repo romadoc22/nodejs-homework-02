@@ -55,7 +55,7 @@ const userSubscriptionValidator = Joi.object({
 });
 
 const userEmailValidator = Joi.object({
-  email: Joi.string().email(),
+  email: Joi.string().email().required(),
 });
 
 const schemas = {
